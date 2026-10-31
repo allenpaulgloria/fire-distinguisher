@@ -4,23 +4,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 /// Mock vision classification service for Fire Distinguisher.
 ///
 /// Simulates heavy neural-network processing with a 1.5-second delay and
-/// returns `"NOT FIRE"` 95% of the time and `"FIRE"` 5% of the time.
+/// returns `"NOT FIRE"` most of the time and `"FIRE DETECTED"` ~25% of the time
+/// (or on demand when `forceFire` is true).
 class VisionService {
   VisionService({Random? random}) : _random = random ?? Random();
 
   final Random _random;
 
+  static const String fireVerdict = 'FIRE DETECTED';
+  static const String notFireVerdict = 'NOT FIRE';
+
   /// Triggers a simulated classification pass.
   ///
-  /// Delays for 1.5 seconds and returns `"FIRE"` (5% probability) or
-  /// `"NOT FIRE"` (95% probability).
-  Future<String> distinguish() async {
+  /// Delays for 1.5 seconds and returns `"FIRE DETECTED"` (25% probability,
+  /// or 100% if [forceFire] is true) or `"NOT FIRE"` (75% probability).
+  Future<String> distinguish({bool forceFire = false}) async {
     await Future<void>.delayed(const Duration(milliseconds: 1500));
-    final roll = _random.nextDouble();
-    if (roll < 0.05) {
-      return 'FIRE';
+    if (forceFire) {
+      return fireVerdict;
     }
-    return 'NOT FIRE';
+    final roll = _random.nextDouble();
+    if (roll < 0.25) {
+      return fireVerdict;
+    }
+    return notFireVerdict;
   }
 }
 
@@ -28,4 +35,3 @@ class VisionService {
 final visionServiceProvider = Provider<VisionService>((ref) {
   return VisionService();
 });
-

@@ -376,6 +376,14 @@ class _FireDistinguisherScreenState
                       HapticFeedback.heavyImpact();
                       ref.read(distinguisherProvider.notifier).distinguish();
                     },
+              onLongPress: isScanning
+                  ? null
+                  : () {
+                      HapticFeedback.heavyImpact();
+                      ref
+                          .read(distinguisherProvider.notifier)
+                          .distinguish(forceFire: true);
+                    },
               style: ElevatedButton.styleFrom(
                 backgroundColor: IndustrialColors.safetyOrange,
                 disabledBackgroundColor:

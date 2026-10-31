@@ -20,7 +20,8 @@ class DistinguisherState {
 
   bool get isScanning => phase == DistinguishPhase.scanning;
   bool get hasVerdict => phase == DistinguishPhase.verdict && verdict != null;
-  bool get isFire => verdict == 'FIRE';
+  bool get isFire =>
+      verdict == VisionService.fireVerdict || verdict == 'FIRE';
 
   DistinguisherState copyWith({
     DistinguishPhase? phase,
@@ -42,7 +43,10 @@ class DistinguisherNotifier extends Notifier<DistinguisherState> {
   }
 
   /// Triggers the 1.5-second optical scan and resolves with the verdict.
-  Future<void> distinguish() async {
+  ///
+  /// Set [forceFire] to `true` (e.g., via long-press) to guarantee a
+  /// `"FIRE DETECTED"` verdict during testing or demos.
+  Future<void> distinguish({bool forceFire = false}) async {
     if (state.isScanning) return;
 
     state = const DistinguisherState(
@@ -50,7 +54,7 @@ class DistinguisherNotifier extends Notifier<DistinguisherState> {
     );
 
     final visionService = ref.read(visionServiceProvider);
-    final result = await visionService.distinguish();
+    final result = await visionService.distinguish(forceFire: forceFire);
 
     state = DistinguisherState(
       phase: DistinguishPhase.verdict,
@@ -71,4 +75,3 @@ final distinguisherProvider =
     NotifierProvider<DistinguisherNotifier, DistinguisherState>(
   DistinguisherNotifier.new,
 );
-
